@@ -35,7 +35,7 @@
               
               if (!eventMoment.isValid()) {
                 winston.log('info', 'invalid date: '+ eventDate + ', trying to fix it');
-                eventDate = eventDate.replace(/[0-9].\.-/g, '');
+                eventDate = eventDate.replace(/[0-9].\.-/g, ' ');
                 eventMoment =  moment(eventDate, ['D.M.', 'D.M.YYYY'], 'fi').year(new Date().getFullYear())
                 if (!eventMoment.isValid()) {
                    winston.log('warn', 'Failed to fix date'); 
@@ -46,7 +46,7 @@
 
               let eventDescription = '';
               $(items[i]).nextUntil('hr', 'p').each((index, text) => {
-                eventDescription += $(text).text() + '\n';
+                eventDescription += $(text).html($(text).html().replace(/<br\s*[\/]?>/gi, '\n')).text() + '\n';
               });
               
               if (eventTitle) {
