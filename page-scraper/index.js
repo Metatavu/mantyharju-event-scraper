@@ -23,12 +23,25 @@
             const items = $('.item-page').find('hr');
             const events = [];
             for (let i = 0; i < items.length; i++) {
-              let eventTitleParts = entities.decode($(items[i]).next('h2').html()).split('<br>');
+              let eventTitlePartsOriginal = entities.decode($(items[i]).nextUntil('hr', 'h2').first().html())
+              let eventTitleParts = eventTitlePartsOriginal.split('<br>');
               let eventTitle = eventTitleParts[0] ? eventTitleParts[0].replace(/<(?:.|\n)*?>/gm, '') : null;
               let eventDate = eventTitleParts[1] ? eventTitleParts[1].replace(/<(?:.|\n)*?>/gm, '') : null;
-              let eventMoment = eventDate ? moment(eventDate.replace(/-/g, ' '), ['D.M.', 'D.M.YYYY'], 'fi').year(new Date().getFullYear()) : null;
-              if (eventMoment && !eventMoment.isValid()) {
-                winston.log('warn', 'invalid date: '+ eventDate);
+              let eventMoment = eventDate ? moment(eventDate, ['D.M.', 'D.M.YYYY'], 'fi').year(new Date().getFullYear()) : null;
+              
+              if(!eventMoment) {
+                continue;
+              }
+              
+              if (!eventMoment.isValid()) {
+                winston.log('info', 'invalid date: '+ eventDate + ', trying to fix it');
+                eventDate = eventDate.replace(/[0-9].\.-/g, '');
+                eventMoment =  moment(eventDate, ['D.M.', 'D.M.YYYY'], 'fi').year(new Date().getFullYear())
+                if (!eventMoment.isValid()) {
+                   winston.log('warn', 'Failed to fix date'); 
+                } else {
+                  winston.log('info', 'Successfully fixed date'); 
+                }
               }
 
               let eventDescription = '';
